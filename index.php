@@ -30,10 +30,37 @@
   </div>
 </body>
 <script>
-function smsLogin() {
+AccountKit_OnInteractive = function() {
+  AccountKit.init({
+    appId: '<APP_ID>',
+    state: '<?php echo bin2hex(openssl_random_pseudo_bytes(32)); ?>',
+    version: 'v1.0'
+  });
+};
+
+function loginCallback(response) {
+  console.log(response);
+  if (response.status === "PARTIALLY_AUTHENTICATED") {
+    document.getElementById('code').value = response.code;
+    document.getElementById('csrf').value = response.state;
+    document.getElementById('form').submit();
+  }
 }
 
+function smsLogin() {
+  var countryCode = document.getElementById('country').value;
+  var phoneNumber = document.getElementById('phone').value;
+  AccountKit.login(
+    'PHONE',
+    {countryCode: countryCode, phoneNumber: phoneNumber},
+    loginCallback
+  );
+}
+
+// email form submission handler
 function emailLogin( ){
+  var emailAddress = document.getElementById("email").value;
+  AccountKit.login('EMAIL', {emailAddress: emailAddress}, loginCallback);
 }
 </script>
 </html>
